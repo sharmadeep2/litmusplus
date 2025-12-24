@@ -38,6 +38,8 @@ litmusplus/
     ├── setup-verify.sh         # Linux/Mac setup verification script
     ├── start-litmus.bat        # Start LitmusChaos services (Windows)
     ├── final-verify.bat        # Complete setup verification
+    ├── graceful-shutdown.bat   # Graceful shutdown script (Windows)
+    ├── graceful-shutdown.ps1   # Graceful shutdown script (PowerShell)
     ├── admin-setup.bat         # Authentication troubleshooting
     ├── test-auth-simple.ps1    # Test authentication credentials
     └── create-admin.sh         # Manual admin user creation script
@@ -84,6 +86,76 @@ helm uninstall chaos -n litmus
 # Delete entire cluster
 kind delete cluster --name litmus-cluster
 ```
+
+## 🛑 Graceful Shutdown
+
+### 🚀 Method 1: One-Click Shutdown (Recommended)
+
+```powershell
+# Navigate to setup directory
+cd litmus-setup
+
+# Run graceful shutdown (Windows)
+.\graceful-shutdown.bat
+
+# OR using PowerShell
+.\graceful-shutdown.ps1
+```
+
+This script will:
+- ✅ Stop all port-forwarding processes
+- ✅ Remove demo applications (nginx, etc.)
+- ✅ Scale down all LitmusChaos services gracefully
+- ✅ Delete Kubernetes cluster and containers
+- ✅ Clean up Docker resources and free disk space
+- ✅ Verify complete shutdown
+
+### 🔧 Method 2: Manual Shutdown Steps
+
+```powershell
+# Step 1: Stop port forwarding
+Get-Process | Where-Object {$_.ProcessName -eq "kubectl"} | Stop-Process -Force
+
+# Step 2: Remove demo applications
+kubectl delete namespace chaos-demo --timeout=60s
+
+# Step 3: Scale down LitmusChaos
+kubectl scale deployment --all --replicas=0 -n litmus
+kubectl scale statefulset --all --replicas=0 -n litmus
+kubectl delete pods --all -n litmus --force
+
+# Step 4: Remove cluster
+docker stop litmus-cluster-control-plane litmus-cluster-worker litmus-cluster-worker2
+docker rm litmus-cluster-control-plane litmus-cluster-worker litmus-cluster-worker2
+
+# Step 5: Clean Docker resources
+docker system prune -f
+```
+
+### 🆘 PowerShell Advanced Options
+
+```powershell
+# Silent shutdown (no confirmations)
+.\graceful-shutdown.ps1 -SkipConfirmation
+
+# Force shutdown (ignore errors)
+.\graceful-shutdown.ps1 -Force
+
+# Combined options
+.\graceful-shutdown.ps1 -SkipConfirmation -Force
+```
+
+### 📋 Shutdown Verification
+
+After running the shutdown script, verify:
+
+- [ ] No Docker containers with "litmus" in name
+- [ ] Port 9091 is free (not in use)
+- [ ] No kubectl processes running
+- [ ] Docker space has been reclaimed
+- [ ] System resources freed
+
+---
 
 ## ⚡ Starting Applications - Quick Guide
 
