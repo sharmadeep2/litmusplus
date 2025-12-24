@@ -1,0 +1,33 @@
+# Custom values for LitmusChaos installation
+portal:
+  frontend:
+    service:
+      type: NodePort
+      nodePort: 30031
+  server:
+    service:
+      type: NodePort
+      nodePort: 30032
+  
+# Use compatible MongoDB image for better stability
+mongodb:
+  image:
+    registry: ghcr.io/zcube
+    repository: bitnami-compat/mongodb
+    tag: 6.0.5
+  persistence:
+    size: 2Gi
+    
+# Enable monitoring capabilities
+openshift:
+  route:
+    enabled: false
+    
+# Resource limits for local development
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
