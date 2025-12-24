@@ -30,12 +30,17 @@ This repository contains a complete local setup for LitmusChaos, an open-source 
 
 ```
 litmusplus/
-├── README.md                 # This file
-└── litmus-setup/            # LitmusChaos setup files
-    ├── kind-config.yaml     # Kubernetes cluster configuration
-    ├── litmus-values.yaml   # Helm chart values for Litmus
-    ├── setup-verify.bat     # Windows setup verification script
-    └── setup-verify.sh      # Linux/Mac setup verification script
+├── README.md                    # This file
+└── litmus-setup/               # LitmusChaos setup files
+    ├── kind-config.yaml        # Kubernetes cluster configuration
+    ├── litmus-values.yaml      # Helm chart values for Litmus
+    ├── setup-verify.bat        # Windows setup verification script
+    ├── setup-verify.sh         # Linux/Mac setup verification script
+    ├── start-litmus.bat        # Start LitmusChaos services (Windows)
+    ├── final-verify.bat        # Complete setup verification
+    ├── admin-setup.bat         # Authentication troubleshooting
+    ├── test-auth-simple.ps1    # Test authentication credentials
+    └── create-admin.sh         # Manual admin user creation script
 ```
 
 ## 🛠️ What Gets Installed
@@ -79,6 +84,83 @@ helm uninstall chaos -n litmus
 # Delete entire cluster
 kind delete cluster --name litmus-cluster
 ```
+
+## ⚡ Starting Applications - Quick Guide
+
+### 🚀 Method 1: One-Click Startup (Recommended)
+
+```powershell
+# Navigate to setup directory
+cd litmus-setup
+
+# Run complete verification and startup
+.\final-verify.bat
+```
+
+This script will:
+- ✅ Check Kubernetes cluster status
+- ✅ Verify all LitmusChaos services are running
+- ✅ Test frontend accessibility
+- ✅ Display login credentials
+
+### 🔧 Method 2: Manual Startup
+
+```powershell
+# Step 1: Check if cluster is running
+kubectl cluster-info
+
+# Step 2: Check LitmusChaos pods
+kubectl get pods -n litmus
+
+# Step 3: Start port forwarding (in new terminal)
+Start-Process PowerShell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus" -WindowStyle Minimized
+
+# Step 4: Access the UI
+# Open browser: http://localhost:9091
+# Username: admin
+# Password: litmus
+```
+
+### 🆘 Troubleshooting Startup Issues
+
+#### Authentication Problems:
+```powershell
+# Test multiple credential combinations
+.\test-auth-simple.ps1
+
+# Run authentication troubleshooting
+.\admin-setup.bat
+```
+
+#### Service Not Accessible:
+```powershell
+# Check if services are running
+kubectl get svc -n litmus
+
+# Restart LitmusChaos services
+kubectl rollout restart deployment -n litmus
+
+# Wait for services to be ready
+kubectl wait --for=condition=ready pod --all -n litmus --timeout=300s
+```
+
+#### Complete Environment Reset:
+```powershell
+# If everything fails, recreate the environment
+kind delete cluster --name litmus-cluster
+.\setup-verify.bat
+```
+
+### 📋 Startup Checklist
+
+- [ ] Docker Desktop is running
+- [ ] Kubernetes cluster is accessible (`kubectl cluster-info`)
+- [ ] All 7 LitmusChaos pods are in 'Running' state
+- [ ] Port forwarding is active on port 9091
+- [ ] LitmusChaos UI accessible at http://localhost:9091
+- [ ] Login successful with admin/litmus credentials
+
+---
 
 ## 🎯 Step-by-Step Application Setup & Chaos Experiments
 
