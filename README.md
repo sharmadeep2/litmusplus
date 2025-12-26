@@ -5,8 +5,11 @@ This repository contains a complete local setup for LitmusChaos, an open-source 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker Desktop
+- Docker Desktop (running)
 - Windows 10/11 with PowerShell
+- kubectl (usually comes with Docker Desktop)
+- kind (Kubernetes in Docker)
+- Helm
 
 ### Setup
 1. Clone this repository:
@@ -15,16 +18,105 @@ This repository contains a complete local setup for LitmusChaos, an open-source 
    cd litmusplus
    ```
 
-2. Run the setup (automated):
+2. **Option A - Automated Setup** (verification only):
    ```powershell
    cd litmus-setup
    .\setup-verify.bat
    ```
 
-3. Access LitmusChaos:
+3. **Option B - Manual Complete Setup** (from scratch):
+   Follow the [Manual Setup Instructions](#-manual-setup-instructions) below.
+
+4. Access LitmusChaos:
    - URL: http://localhost:9091
    - Username: `admin`
    - Password: `litmus`
+
+## 🔧 Manual Setup Instructions
+
+### Step 1: Verify Prerequisites
+
+1. **Check Docker Desktop is running**:
+   ```powershell
+   docker version
+   ```
+   Should show both Client and Server versions.
+
+2. **Install kind (if not already installed)**:
+   ```powershell
+   # Using Chocolatey
+   choco install kind
+
+   # Or download from https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+   ```
+
+3. **Install Helm (if not already installed)**:
+   ```powershell
+   # Using Chocolatey
+   choco install kubernetes-helm
+
+   # Or download from https://helm.sh/docs/intro/install/
+   ```
+
+### Step 2: Create Kubernetes Cluster
+
+```powershell
+# Navigate to setup directory
+cd litmus-setup
+
+# Create Kind cluster using provided configuration
+kind create cluster --config=kind-config.yaml
+
+# Verify cluster is running
+kubectl get nodes
+```
+
+Expected output: 3 nodes (1 control-plane, 2 workers) in Ready status.
+
+### Step 3: Install LitmusChaos
+
+```powershell
+# Create namespace for Litmus
+kubectl create namespace litmus
+
+# Add LitmusChaos Helm repository
+helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm
+
+# Update Helm repositories
+helm repo update
+
+# Install LitmusChaos using custom values
+helm install chaos litmuschaos/litmus --namespace=litmus --values litmus-values.yaml
+```
+
+### Step 4: Wait for Services to Start
+
+```powershell
+# Wait for all pods to be ready (this may take 2-5 minutes)
+kubectl wait --for=condition=ready pod --all -n litmus --timeout=300s
+
+# Verify all pods are running
+kubectl get pods -n litmus
+```
+
+Expected output: All pods should show `1/1 Running` status.
+
+### Step 5: Start Port Forwarding and Access UI
+
+```powershell
+# Start port forwarding to access the UI (keep this terminal open)
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
+```
+
+**Important**: Keep this terminal window open. Port forwarding must remain active to access the UI.
+
+### Step 6: Access LitmusChaos
+
+1. Open your web browser
+2. Navigate to: **http://localhost:9091**
+3. Login with:
+   - **Username**: `admin`
+   - **Password**: `litmus`
 
 ## 📁 Repository Structure
 
@@ -157,80 +249,121 @@ After running the shutdown script, verify:
 
 ---
 
-## ⚡ Starting Applications - Quick Guide
+## ⚡ Starting Applications - Complete Guide
 
-### 🚀 Method 1: One-Click Startup (Recommended)
+### 🚀 Method 1: Quick Restart (if cluster already exists)
 
 ```powershell
 # Navigate to setup directory
 cd litmus-setup
 
-# Run complete verification and startup
-.\final-verify.bat
-```
+# Check if cluster exists
+kind get clusters
 
-This script will:
-- ✅ Check Kubernetes cluster status
-- ✅ Verify all LitmusChaos services are running
-- ✅ Test frontend accessibility
-- ✅ Display login credentials
-
-### 🔧 Method 2: Manual Startup
-
-```powershell
-# Step 1: Check if cluster is running
-kubectl cluster-info
-
-# Step 2: Check LitmusChaos pods
+# If cluster exists, verify it's running
 kubectl get pods -n litmus
 
-# Step 3: Start port forwarding (in new terminal)
-Start-Process PowerShell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus" -WindowStyle Minimized
+# Start port forwarding to access UI
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
+```
 
-# Step 4: Access the UI
-# Open browser: http://localhost:9091
-# Username: admin
-# Password: litmus
+### 🔧 Method 2: Complete Setup from Scratch
+
+If you need to start from scratch or the cluster doesn't exist:
+
+```powershell
+# Step 1: Navigate to setup directory
+cd litmus-setup
+
+# Step 2: Create Kubernetes cluster
+kind create cluster --config=kind-config.yaml
+
+# Step 3: Wait for nodes to be ready
+kubectl wait --for=condition=Ready nodes --all --timeout=120s
+
+# Step 4: Create namespace and install LitmusChaos
+kubectl create namespace litmus
+helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm
+helm repo update
+helm install chaos litmuschaos/litmus --namespace=litmus --values litmus-values.yaml
+
+# Step 5: Wait for all pods to be ready
+kubectl wait --for=condition=ready pod --all -n litmus --timeout=300s
+
+# Step 6: Start port forwarding
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
 ```
 
 ### 🆘 Troubleshooting Startup Issues
 
-#### Authentication Problems:
+#### No Cluster Found:
 ```powershell
-# Test multiple credential combinations
-.\test-auth-simple.ps1
+# Check if cluster exists
+kind get clusters
 
-# Run authentication troubleshooting
-.\admin-setup.bat
+# If no clusters, create one
+kind create cluster --config=kind-config.yaml
+```
+
+#### Cluster Not Responding:
+```powershell
+# Check cluster status
+kubectl cluster-info
+
+# If failed, restart cluster
+kind delete cluster --name litmus-cluster
+kind create cluster --config=kind-config.yaml
+```
+
+#### LitmusChaos Not Installed:
+```powershell
+# Check if namespace exists
+kubectl get namespace litmus
+
+# If not found, install LitmusChaos
+kubectl create namespace litmus
+helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm
+helm repo update
+helm install chaos litmuschaos/litmus --namespace=litmus --values litmus-values.yaml
+```
+
+#### Pods Not Ready:
+```powershell
+# Check pod status
+kubectl get pods -n litmus
+
+# If pods are failing, check logs
+kubectl logs -l app=chaos-litmus-frontend -n litmus
+
+# Restart deployments if needed
+kubectl rollout restart deployment -n litmus
 ```
 
 #### Service Not Accessible:
 ```powershell
-# Check if services are running
-kubectl get svc -n litmus
+# Check if port forwarding is running
+netstat -an | findstr 9091
 
-# Restart LitmusChaos services
-kubectl rollout restart deployment -n litmus
-
-# Wait for services to be ready
-kubectl wait --for=condition=ready pod --all -n litmus --timeout=300s
+# If not running, start port forwarding
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
 ```
 
-#### Complete Environment Reset:
-```powershell
-# If everything fails, recreate the environment
-kind delete cluster --name litmus-cluster
-.\setup-verify.bat
-```
+### 📋 Complete Startup Checklist
 
-### 📋 Startup Checklist
-
-- [ ] Docker Desktop is running
+- [ ] Docker Desktop is running (`docker version`)
+- [ ] Kind cluster exists (`kind get clusters`)
 - [ ] Kubernetes cluster is accessible (`kubectl cluster-info`)
-- [ ] All 7 LitmusChaos pods are in 'Running' state
-- [ ] Port forwarding is active on port 9091
+- [ ] LitmusChaos namespace exists (`kubectl get namespace litmus`)
+- [ ] All LitmusChaos pods are in 'Running' state (`kubectl get pods -n litmus`)
+- [ ] Port forwarding is active on port 9091 (`netstat -an | findstr 9091`)
 - [ ] LitmusChaos UI accessible at http://localhost:9091
 - [ ] Login successful with admin/litmus credentials
+
+### ⏱️ Expected Startup Times
+- **Cluster Creation**: 30-60 seconds
+- **LitmusChaos Installation**: 2-5 minutes
+- **Port Forwarding**: Immediate
+- **Total Setup Time**: 3-7 minutes
 
 ---
 
