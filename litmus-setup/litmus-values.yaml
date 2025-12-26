@@ -1,6 +1,20 @@
-# Custom values for LitmusChaos installation
+# Custom values for Litmus++ Enhanced Chaos Engineering Platform
+# Based on LitmusChaos 3.24.0 with custom branding
+
 portal:
   frontend:
+    # Custom Litmus++ frontend image - override the full image path
+    image:
+      imageRegistryName: ""
+      repository: "litmusplus/frontend"
+      tag: "3.24.0-plus"
+      pullPolicy: "IfNotPresent"
+    # Override any default image registry
+    customLabels:
+      image-override: "true"
+    service:
+      type: NodePort
+      nodePort: 30031
     service:
       type: NodePort
       nodePort: 30031
@@ -18,6 +32,15 @@ mongodb:
   persistence:
     size: 2Gi
     
+# Custom labels and annotations for Litmus++ branding
+customLabels:
+  app.kubernetes.io/brand: "litmus-plus"
+  platform: "enhanced-chaos-engineering"
+
+customPodAnnotations:
+  platform.io/brand: "litmus++"
+  chaos.engineering/enhanced: "true"
+
 # Enable monitoring capabilities
 openshift:
   route:

@@ -1,0 +1,58 @@
+/* Litmus++ Custom Branding Overrides */
+
+/* Hide the original Litmus branding text */
+[class*="MuiBox"]:has-text("Litmus"),
+[class*="sidebar"]:has-text("Litmus"),
+span:contains("Litmus 3.0"),
+div:contains("Litmus 3.0") {
+    visibility: hidden;
+    position: relative;
+}
+
+/* Add Litmus++ branding using CSS pseudo-elements */
+[class*="MuiBox"]:has-text("Litmus")::after,
+[class*="sidebar"]:has-text("Litmus")::after,
+span:contains("Litmus 3.0")::after,
+div:contains("Litmus 3.0")::after {
+    content: "Litmus++ 3.0";
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #6c5ce7;
+    font-weight: bold;
+}
+
+/* Alternative approach using text replacement */
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Custom styling for enhanced branding */
+.litmus-plus-enhanced {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom logo area styling */
+[aria-label*="logo"], 
+[data-testid*="logo"],
+.logo-container {
+    position: relative;
+}
+
+[aria-label*="logo"]::before, 
+[data-testid*="logo"]::before,
+.logo-container::before {
+    content: "Litmus++";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #6c5ce7;
+    z-index: 1000;
+}

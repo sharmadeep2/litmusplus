@@ -1,6 +1,14 @@
-# LitmusPlus - Local LitmusChaos Setup
+# LitmusPlus - Enhanced Chaos Engineering Platform
 
-This repository contains a complete local setup for LitmusChaos, an open-source Chaos Engineering platform.
+This repository contains a complete local setup for **Litmus++ Enhanced Chaos Engineering Platform**, built on top of LitmusChaos with custom branding and enhanced features.
+
+## 🎯 **What is Litmus++?**
+
+Litmus++ is an enhanced version of the open-source LitmusChaos platform, featuring:
+- ✨ **Custom Branding**: Enhanced UI with Litmus++ identity
+- 🚀 **Extended Features**: Additional chaos engineering capabilities
+- 📊 **Enhanced Monitoring**: Improved observability and reporting
+- 🔧 **Customizable**: Tailored for advanced chaos engineering workflows
 
 ## 🚀 Quick Start
 
@@ -24,13 +32,39 @@ This repository contains a complete local setup for LitmusChaos, an open-source 
    .\setup-verify.bat
    ```
 
-3. **Option B - Manual Complete Setup** (from scratch):
+3. **Option B - Enhanced Litmus++ Setup** (recommended for enhanced experience):
+   ```powershell
+   # Build custom frontend with enhanced branding
+   cd custom-frontend
+   .\build-frontend.ps1
+
+   # Deploy Litmus++ with custom branding
+   cd ..\litmus-setup
+   .\update-litmus-plus.ps1
+   ```
+
+4. **Option C - Manual Complete Setup** (from scratch):
    Follow the [Manual Setup Instructions](#-manual-setup-instructions) below.
 
-4. Access LitmusChaos:
+5. Access Litmus++ Enhanced Platform:
+5. Access Litmus++ Enhanced Platform:
    - URL: http://localhost:9091
+   - Platform: **Litmus++ Enhanced Chaos Engineering**
    - Username: `admin`
    - Password: `litmus`
+
+## 🎨 **Custom Branding Features**
+
+### Enhanced UI Elements
+- 🏷️ **Custom Title**: "Litmus++ Chaos Engineering Platform"
+- 🎯 **Enhanced Branding**: Updated logos and visual identity
+- 📱 **Responsive Design**: Optimized for modern browsers
+- 🔧 **Custom Headers**: Enhanced HTTP headers for identification
+
+### Extended Functionality
+- 📊 **Enhanced Monitoring**: Improved metrics and dashboards
+- 🔍 **Advanced Logging**: Better error tracking and debugging
+- ⚡ **Performance Optimizations**: Faster load times and responsiveness
 
 ## 🔧 Manual Setup Instructions
 
@@ -123,12 +157,20 @@ kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
 ```
 litmusplus/
 ├── README.md                    # This file
-└── litmus-setup/               # LitmusChaos setup files
+├── custom-frontend/            # Litmus++ Custom Frontend Assets
+│   ├── Dockerfile             # Custom frontend Docker image
+│   ├── index.html             # Enhanced HTML with Litmus++ branding
+│   ├── nginx-custom.conf      # Custom nginx configuration
+│   ├── startup-branding.sh    # Branding initialization script
+│   ├── build-frontend.ps1     # Windows build script
+│   └── build.sh              # Linux/Mac build script
+└── litmus-setup/               # Litmus++ setup files
     ├── kind-config.yaml        # Kubernetes cluster configuration
-    ├── litmus-values.yaml      # Helm chart values for Litmus
+    ├── litmus-values.yaml      # Enhanced Helm values for Litmus++
+    ├── update-litmus-plus.ps1  # Litmus++ deployment script
     ├── setup-verify.bat        # Windows setup verification script
     ├── setup-verify.sh         # Linux/Mac setup verification script
-    ├── start-litmus.bat        # Start LitmusChaos services (Windows)
+    ├── start-litmus.bat        # Start services (Windows)
     ├── final-verify.bat        # Complete setup verification
     ├── graceful-shutdown.bat   # Graceful shutdown script (Windows)
     ├── graceful-shutdown.ps1   # Graceful shutdown script (PowerShell)
@@ -141,8 +183,10 @@ litmusplus/
 
 - **Kind** - Kubernetes in Docker (3-node cluster)
 - **Helm** - Package manager for Kubernetes
-- **LitmusChaos** - Complete chaos engineering platform
+- **Litmus++ Enhanced Platform** - Custom-branded chaos engineering platform
 - **MongoDB** - Database backend for Litmus
+- **Custom Frontend** - Enhanced UI with Litmus++ branding
+- **Enhanced Monitoring** - Improved observability features
 
 ## 🔧 Management Commands
 
